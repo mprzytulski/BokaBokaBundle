@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="boka_boka.connection.class">Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection</parameter>
+        <parameter key="boka_boka.connection_manager.class">Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection\Manager</parameter>
+
+        <parameter key="boka_boka.connection.default.host">localhost</parameter>
+        <parameter key="boka_boka.connection.default.port">5672</parameter>
+        <parameter key="boka_boka.connection.default.vhost">/</parameter>
+        <parameter key="boka_boka.connection.default.user"></parameter>
+        <parameter key="boka_boka.connection.default.password"></parameter>
+    </parameters>
+
+    <services>
+        <service id="boka_boka.connection.default" class="%boka_boka.connection.class%">
+            <argument>%boka_boka.connection.default.host%</argument>
+            <argument>%boka_boka.connection.default.port%</argument>
+            <argument>%boka_boka.connection.default.vhost%</argument>
+            <argument>%boka_boka.connection.default.user%</argument>
+            <argument>%boka_boka.connection.default.password%</argument>
+            <tag name="boka_boka.connection" />
+        </service>
+        <service id="boka_boka.connection_manager" class="%boka_boka.connection_manager.class%">
+            <argument type="service" id="service_container" />
+        </service>
+    </services>
+
+</container>
