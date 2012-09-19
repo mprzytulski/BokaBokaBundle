@@ -11,18 +11,29 @@ trait DecoratedObject
 
     protected $related;
 
+    protected $declared = false;
+
     protected $proxy_values = array();
 
-    public function getRelatedObject($klass, $args)
+    protected function getRelatedObject($klass, $args, $to_write = false)
     {
-        if(!$this->related) {
+        $reflection = null;
+        if(!$this->related || ($to_write && !$this->declared)) {
             $reflection = new \ReflectionClass($klass);
+        }
+
+        if(!$this->related) {
             $this->related = $reflection->newInstanceArgs($args);
         }
+
+        if($to_write && !$this->declared && $reflection->hasMethod('declare')) {
+            $this->related->declare();
+        }
+
         return $this->related;
     }
 
-    public function setIfRelated($param, $value)
+    protected function setIfRelated($param, $value)
     {
         if($this->related) {
             $method = 'set'.ucfirst($param);
@@ -35,7 +46,7 @@ trait DecoratedObject
         }
     }
 
-    public function getIfRelated($name)
+    protected function getIfRelated($name)
     {
         if($this->related) {
             $method = 'get'.ucfirst($name);

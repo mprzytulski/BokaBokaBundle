@@ -6,10 +6,15 @@
 
 namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
 
+use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
+
 class Connection extends \AMQPConnection
 {
 
-    private $channell = null;
+    use DecoratedObject;
+
+
+    private $channel = null;
 
     public function __construct($host = 'localhost', $port = 3333, $vhost = '/', $login = '', $password ='')
     {
@@ -20,17 +25,23 @@ class Connection extends \AMQPConnection
             'login' => $login,
             'password' => $password
         ));
+        $this->connect();
+    }
+
+    public function getRelated($to_write = false)
+    {
+        return $this->getRelatedObject('\AMQPConnection', array($this->getConnection()->getChannel()), $to_write);
     }
 
     public function connect()
     {
         parent::connect();
-        $this->channell = new AMQPChannel($this);
+        $this->channel = new \AMQPChannel($this);
     }
 
     public function getChannel()
     {
-        return $this->channell;
+        return $this->channel;
     }
 
     public function __destruct()
@@ -39,5 +50,16 @@ class Connection extends \AMQPConnection
             $this->disconnect();
         }
     }
+
+    public function __toString()
+    {
+        return json_encode(array(
+                'host' => $this->getHost(),
+                'port' => $this->getPort(),
+                'vhost' => $this->getVhost(),
+                'login' => $this->getLogin()
+            ));
+    }
+
 
 }

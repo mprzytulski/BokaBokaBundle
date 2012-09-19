@@ -40,18 +40,31 @@ class TestCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $queue = new TestQueue();
-        $exchange = new TestExchange();
+
+
+//        $queue = new TestQueue();
+//        $exchange = new TestExchange();
+
+        $connection = $this->getContainer()->get('boka_boka.connection.default');
+
+        $queue = $this->getContainer()->get('boka_boka.queue.default');
+        $exchange = $this->getContainer()->get('boka_boka.exchange.default');
+
+//        $queue->bind($exchange, 'test');
 
         $message = new SimpleMessage();
         $message->setTitle('test');
         $message->setBody('asdfasdfasdf asdf asd fas');
 
-//        var_dump($exchange->getType());
-//
+        $output->writeln("connection:: ". (string)$connection);
         $output->writeln("queue:: ". (string)$queue);
         $output->writeln("exchange:: ". (string)$exchange);
         $output->writeln("message:: ". (string)$message);
+
+        $exchange->publish($message);
+
+        $message1 = $queue->getOne();
+        $output->writeln("message:: ". (string)$message1);
     }
 
 }

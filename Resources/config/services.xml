@@ -6,9 +6,11 @@
 
     <parameters>
         <parameter key="boka_boka.connection.class">Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection</parameter>
+        <parameter key="boka_boka.exchange.class">Aurora\BokaBokaBundle\Messaging\RabbitMQ\Exchange</parameter>
+        <parameter key="boka_boka.queue.class">Aurora\BokaBokaBundle\Messaging\RabbitMQ\Queue</parameter>
         <parameter key="boka_boka.connection_manager.class">Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection\Manager</parameter>
 
-        <parameter key="boka_boka.connection.default.host">localhost</parameter>
+        <parameter key="boka_boka.connection.default.host">10.8.0.10</parameter>
         <parameter key="boka_boka.connection.default.port">5672</parameter>
         <parameter key="boka_boka.connection.default.vhost">/</parameter>
         <parameter key="boka_boka.connection.default.user"></parameter>
@@ -16,6 +18,7 @@
     </parameters>
 
     <services>
+
         <service id="boka_boka.connection.default" class="%boka_boka.connection.class%">
             <argument>%boka_boka.connection.default.host%</argument>
             <argument>%boka_boka.connection.default.port%</argument>
@@ -24,9 +27,20 @@
             <argument>%boka_boka.connection.default.password%</argument>
             <tag name="boka_boka.connection" />
         </service>
-        <service id="boka_boka.connection_manager" class="%boka_boka.connection_manager.class%">
-            <argument type="service" id="service_container" />
+
+        <service id="boka_boka.exchange.default" class="%boka_boka.exchange.class%">
+            <argument type="service" id="boka_boka.connection.default" />
+            <argument>default</argument>
         </service>
+
+        <service id="boka_boka.queue.default" class="%boka_boka.queue.class%">
+            <argument type="service" id="boka_boka.connection.default" />
+            <argument>default</argument>
+            <argument type="service" id="boka_boka.exchange.default" />
+            <argument>default</argument>
+        </service>
+
+
     </services>
 
 </container>

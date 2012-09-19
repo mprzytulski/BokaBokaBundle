@@ -6,42 +6,43 @@
 
 namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
 
-use \Aurora\BokaBokaBundle\Messaging\Traits\Annotated;
 use \Aurora\BokaBokaBundle\Messaging\Traits\ConnectionRelatedObject;
 use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
 use \Aurora\BokaBokaBundle\Messaging\Annotations as Messaging;
 use \Aurora\BokaBokaBundle\Messaging\Annotations\ExchangeType;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Bindable;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Message;
+use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection;
 
 /**
  * @Messaging\Exchange("default")
  */
 class Exchange implements Bindable
 {
-    use Annotated {
-        Annotated::__construct as annotate;
-    }
     use ConnectionRelatedObject;
     use DecoratedObject;
 
-
-    public function __construct($name = '', $type = ExchangeType::DIRECT, $connection = null)
+    public function __construct(Connection $connection, $name = 'default', $type = ExchangeType::DIRECT)
     {
+        $this->setConnection($connection);
         $this->setName($name);
         $this->setType($type);
-        $this->setConnection($connection);
-        $this->annotate();
+        $this->getRelated(true);
     }
 
-    protected function getRelated()
+    public function getDefaults()
     {
-        return $this->getRelatedObject('\AMQPExchange', $this->getConnection()->getChannel());
+        return $this->defaults;
+    }
+
+    public function getRelated($to_write = false)
+    {
+        return $this->getRelatedObject('\AMQPExchange', array($this->getConnection()->getChannel()), $to_write);
     }
 
     public function publish(Message $message)
     {
-        return $this->getRelated()->publish($message->getBody(), $message->getRoutingKey(), $message->getFlags(), $message->getAttributes());
+        return $this->getRelated(true)->publish($message->getBody(), $message->getRoutingKey(), $message->getFlags(), $message->getAttributes());
     }
 
     public function bind(Bindable $obj)
@@ -51,22 +52,22 @@ class Exchange implements Bindable
 
     public function setName($name)
     {
-        $this->setIfRelated('name', $name);
+        $this->getRelated()->setName($name);
     }
 
     public function getName()
     {
-        $this->getIfRelated('name');
+        return $this->getRelated()->getName();
     }
 
     public function setType($type)
     {
-        $this->setIfRelated('type', $type);
+        $this->getRelated()->setType($type);
     }
 
     public function getType()
     {
-        $this->getIfRelated('type');
+        return $this->getRelated()->getType();
     }
 
     public function setDurable($durable = true)
@@ -76,7 +77,7 @@ class Exchange implements Bindable
 
     public function isDurable()
     {
-        $this->getIfRelated('durable');
+        return $this->getIfRelated('durable');
     }
 
     public function setPassiv($passiv = true)
@@ -86,7 +87,7 @@ class Exchange implements Bindable
 
     public function isPassiv()
     {
-        $this->getIfRelated('passiv');
+        return $this->getIfRelated('passiv');
     }
 
     public function delete()

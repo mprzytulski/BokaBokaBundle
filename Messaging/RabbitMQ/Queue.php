@@ -7,30 +7,29 @@
 namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
 
 use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection\Manager;
-use \Aurora\BokaBokaBundle\Messaging\Traits\Annotated;
 use \Aurora\BokaBokaBundle\Messaging\Traits\ConnectionRelatedObject;
 use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
-use \Aurora\BokaBokaBundle\Messaging\Annotations as Messaging;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Bindable;
+use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection;
 
-/**
- * @Messaging\Queue("default")
- */
 class Queue implements Bindable
 {
-    use Annotated {
-        Annotated::__construct as annotate;
-    }
+
     use ConnectionRelatedObject;
     use DecoratedObject;
 
-    public function __construct($name = null, $connection = 'default') {
-
-        if($name !== null && !empty($name)) {
-            $this->setName($name);
-        }
+    public function __construct($connection, $name = 'default', $exchange = null, $bind_key = 'default') {
         $this->setConnection($connection);
-        $this->annotate();
+        $this->setName($name);
+        $this->getRelated();
+        if($exchange != null) {
+            $this->bind($exchange, $bind_key);
+        }
+    }
+
+    public function bind(Exchange $exchange, $routing_key)
+    {
+        $this->getRelated(true)->bind($exchange->getRelated(true)->getName(), $routing_key);
     }
 
     /**
@@ -38,7 +37,7 @@ class Queue implements Bindable
      */
     public function getOne($auto_ack = true)
     {
-        return $this->getRelated()->get();
+        return Message::create($this->getRelated()->get());
     }
 
     public function get($items = 1, $auto_ack = true)
@@ -64,17 +63,17 @@ class Queue implements Bindable
 
     public function setName($name)
     {
-        $this->setIfRelated('name', $name);
+        $this->getRelated()->setName($name);
     }
 
     public function getName()
     {
-        $this->getIfRelated('name');
+        return $this->getRelated()->getName();
     }
 
-    protected function getRelated()
+    protected function getRelated($to_write = false)
     {
-        return $this->getRelatedObject('\AMQPQueue', $this->getConnection());
+        return $this->getRelatedObject('\AMQPQueue', array($this->getConnection()->getChannel()), $to_write);
     }
 
 

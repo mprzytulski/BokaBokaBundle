@@ -10,6 +10,8 @@ use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection\ConnectionCompilerPass;
 class BokaBokaBundle extends Bundle
 {
 
+    protected static $_container;
+
     public function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(new ConnectionCompilerPass());
