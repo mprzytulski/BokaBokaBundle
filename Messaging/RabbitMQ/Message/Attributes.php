@@ -5,7 +5,7 @@ namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
 /**
  * @Annotation
  */
-class Attributes extends \SplEnum implements \JsonSerializable
+class Attributes implements \JsonSerializable
 {
 
     protected $attrs;
@@ -24,11 +24,11 @@ class Attributes extends \SplEnum implements \JsonSerializable
     const TYPE             = 'type';
     const REPLY_TO         = 'reply_to';
 
-    public function __construct(array $attrs = null)
+    public function __construct(array $attrs = array())
     {
-        $allowed = $this->getConstList();
-        $not_allowed = array_diff($attrs, $allowed);
-
+//        $allowed = $this->getConstList();
+//        $not_allowed = array_diff($attrs, $allowed);
+        $not_allowed = array();
         if(count($not_allowed) > 0) {
             throw new \InvalidArgumentException("Not allowed attrs: ".implode(', ', $not_allowed));
         }
@@ -154,6 +154,11 @@ class Attributes extends \SplEnum implements \JsonSerializable
     public function getReplyTo()
     {
         $this->getAttr('reply_to');
+    }
+
+    public function asArray()
+    {
+        return $this->attrs;
     }
 
     public function jsonSerialize()

@@ -55,6 +55,7 @@ class TestCommand extends ContainerAwareCommand
         $message = new SimpleMessage();
         $message->setTitle('test');
         $message->setBody('asdfasdfasdf asdf asd fas');
+        $message->getHeaders()->add("X-Custom-Header", "test");
 
         $output->writeln("connection:: ". (string)$connection);
         $output->writeln("queue:: ". (string)$queue);

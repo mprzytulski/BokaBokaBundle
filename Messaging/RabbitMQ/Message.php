@@ -9,6 +9,7 @@ namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Message as MessageInterface;
 use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Attributes;
 use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Headers;
+use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Flags;
 
 class Message implements MessageInterface
 {
@@ -17,11 +18,18 @@ class Message implements MessageInterface
     protected $routing_key = null;
 
     protected $attributes;
+    protected $headers;
+    protected $flags;
 
-    public function __construct($routing_key = 'default', array $body_parts = array(), Attributes $attrs = null, Headers $headers = null)
+    public function __construct($routing_key = 'default', array $body_parts = array(), Flags $flags = null, Attributes $attrs = null, Headers $headers = null)
     {
         $this->routing_key = $routing_key;
         $this->body_parts = $body_parts;
+
+        if ($flags === null) {
+            $flags = new Flags();
+        }
+        $this->flags = $flags;
 
         if ($attrs === null) {
             $attrs = new Attributes();
@@ -75,9 +83,12 @@ class Message implements MessageInterface
 
     public function getFlags()
     {
-        return 0;
+        return $this->flags;
     }
 
+    /**
+     * @return \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Attributes
+     */
     public function getAttributes()
     {
         return $this->attributes;
@@ -88,6 +99,9 @@ class Message implements MessageInterface
         $this->attributes = $attributes;
     }
 
+    /**
+     * @return \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Headers
+     */
     public function getHeaders()
     {
         return $this->headers;
@@ -121,15 +135,22 @@ class Message implements MessageInterface
 
         $headers = new Headers($raw->getHeaders());
 
+        $flags = new Flags();
+
 //        const DELIVERY_MODE    = 'delivery_mode';
 
-        $msg = new Message($raw->getRoutingKey(), $body, $attrs, $headers);
+        $msg = new Message($raw->getRoutingKey(), $body, $flags, $attrs, $headers);
         return $msg;
     }
 
     public function __toString()
     {
-        return json_encode(['routing_key' => $this->routing_key, 'body' => $this->body_parts, $this->attributes]);
+        return json_encode([
+            'routing_key' => $this->routing_key,
+            'body' => $this->body_parts,
+            'attributes' => $this->getAttributes(),
+            'flags' => $this->getFlags(),
+            'headers' => $this->getHeaders()]);
     }
 
 }

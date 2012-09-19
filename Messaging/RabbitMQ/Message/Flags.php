@@ -39,6 +39,11 @@ class Flags implements \JsonSerializable
         $this->immediate = $immediate;
     }
 
+    public function jsonSerialize()
+    {
+        return array('mandatory' => $this->mandatory, 'immediate' => $this->immediate);
+    }
+
     public function asInt()
     {
         $flags = 0;
@@ -49,7 +54,7 @@ class Flags implements \JsonSerializable
 
     public function __toString()
     {
-        return json_encode(array('mandatory' => $this->mandatory, 'immediate' => $this->immediate));
+        return json_encode($this);
     }
 
 }

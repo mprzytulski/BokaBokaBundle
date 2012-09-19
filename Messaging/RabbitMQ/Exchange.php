@@ -9,7 +9,7 @@ namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
 use \Aurora\BokaBokaBundle\Messaging\Traits\ConnectionRelatedObject;
 use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
 use \Aurora\BokaBokaBundle\Messaging\Annotations as Messaging;
-use \Aurora\BokaBokaBundle\Messaging\Annotations\ExchangeType;
+use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Exchange\Type;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Bindable;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Message;
 use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection;
@@ -22,7 +22,7 @@ class Exchange implements Bindable
     use ConnectionRelatedObject;
     use DecoratedObject;
 
-    public function __construct(Connection $connection, $name = 'default', $type = ExchangeType::DIRECT)
+    public function __construct(Connection $connection, $name = 'default', $type = Type::DIRECT)
     {
         $this->setConnection($connection);
         $this->setName($name);
@@ -42,7 +42,12 @@ class Exchange implements Bindable
 
     public function publish(Message $message)
     {
-        return $this->getRelated(true)->publish($message->getBody(), $message->getRoutingKey(), $message->getFlags(), $message->getAttributes());
+        return $this->getRelated(true)->publish(
+            $message->getBody(),
+            $message->getRoutingKey(),
+            $message->getFlags()->asInt(),
+            $message->getAttributes()->asArray()
+        );
     }
 
     public function bind(Bindable $obj)
@@ -99,7 +104,7 @@ class Exchange implements Bindable
     {
         return json_encode([
             'name' => $this->getName(),
-            'type' => ExchangeType::asString($this->getType()),
+            'type' => Type::asString($this->getType()),
             'durable' => $this->isDurable() ? 'true' : 'false',
             'passiv' => $this->isPassiv() ? 'true' : 'false',
         ]);

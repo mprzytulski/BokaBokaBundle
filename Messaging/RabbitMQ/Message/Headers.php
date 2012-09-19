@@ -4,9 +4,8 @@
  * @since 19.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
+namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
 
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
 
 class Headers implements \JsonSerializable
 {
