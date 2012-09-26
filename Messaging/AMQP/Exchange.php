@@ -4,15 +4,16 @@
  * @since 08.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP;
 
 use \Aurora\BokaBokaBundle\Messaging\Traits\ConnectionRelatedObject;
 use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
-use \Aurora\BokaBokaBundle\Messaging\Annotations as Messaging;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Exchange\Type;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Exchange\Type;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Connection;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Bindable;
-use \Aurora\BokaBokaBundle\Messaging\Interfaces\Message;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection;
+use \Aurora\BokaBokaBundle\Messaging\Interfaces\Message as MessageInterface;
+use \Aurora\BokaBokaBundle\Messaging\Interfaces\Serializer;
+
 
 /**
  * @Messaging\Exchange("default")
@@ -22,17 +23,20 @@ class Exchange implements Bindable
     use ConnectionRelatedObject;
     use DecoratedObject;
 
-    public function __construct(Connection $connection, $name = 'default', $type = Type::DIRECT)
+    protected $serializer;
+
+    public function __construct(Connection $connection, Serializer $serializer, $name = 'default', $type = Type::DIRECT)
     {
+        $this->serializer = $serializer;
         $this->setConnection($connection);
         $this->setName($name);
         $this->setType($type);
         $this->getRelated(true);
     }
 
-    public function getDefaults()
+    public function getSerializer()
     {
-        return $this->defaults;
+        return $this->serializer;
     }
 
     public function getRelated($to_write = false)
@@ -40,13 +44,18 @@ class Exchange implements Bindable
         return $this->getRelatedObject('\AMQPExchange', array($this->getConnection()->getChannel()), $to_write);
     }
 
-    public function publish(Message $message)
+    public function publish(MessageInterface $message)
     {
         return $this->getRelated(true)->publish(
-            $message->getBody(),
+            $this->serializer->serialize($message),
             $message->getRoutingKey(),
             $message->getFlags()->asInt(),
-            $message->getAttributes()->asArray()
+            array_merge(
+                $message->getAttributes()->asArray(),
+                array(
+                    'headers' => $message->getHeaders()->asArray()
+                )
+            )
         );
     }
 

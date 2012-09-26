@@ -4,19 +4,21 @@
  * @since 08.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP;
 
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection\Manager;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Connection\Manager;
 use \Aurora\BokaBokaBundle\Messaging\Traits\ConnectionRelatedObject;
 use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Bindable;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Connection;
 
 class Queue implements Bindable
 {
 
     use ConnectionRelatedObject;
     use DecoratedObject;
+
+    protected $exchanges;
 
     public function __construct($connection, $name = 'default', $exchange = null, $bind_key = 'default') {
         $this->setConnection($connection);
@@ -29,22 +31,28 @@ class Queue implements Bindable
 
     public function bind(Exchange $exchange, $routing_key)
     {
+        $this->exchanges[$exchange->getName()] = $exchange;
         $this->getRelated(true)->bind($exchange->getRelated(true)->getName(), $routing_key);
     }
 
     /**
      * @param bool $auto_ack
      */
-    public function getOne($auto_ack = true)
+    public function getOne($ack = true)
     {
-        return Message::create($this->getRelated()->get());
+        $flags = $ack ? AMQP_AUTOACK : 0;
+        $raw = $this->getRelated()->get($flags);
+        if(!$raw) {
+            return null;
+        }
+        return Message::create($raw, $this->exchanges[$raw->getExchangeName()]);
     }
 
-    public function get($items = 1, $auto_ack = true)
+    public function get($items = 1, $ack = true)
     {
         $collection = [];
         for($i = 0; $i < $items; $i++) {
-            $item = $this->getOne($auto_ack);
+            $item = $this->getOne($ack);
             if($item !== null) {
                 $collection[] = $item;
             }

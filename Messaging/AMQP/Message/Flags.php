@@ -5,7 +5,7 @@
  */
 
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 
 class Flags implements \JsonSerializable
 {

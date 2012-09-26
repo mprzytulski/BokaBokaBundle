@@ -4,7 +4,7 @@
  * @since 19.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 
 
 class Headers implements \JsonSerializable
@@ -28,6 +28,11 @@ class Headers implements \JsonSerializable
     }
 
     public function getAll()
+    {
+        return $this->headers;
+    }
+
+    public function asArray()
     {
         return $this->headers;
     }

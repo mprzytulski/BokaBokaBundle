@@ -14,7 +14,7 @@ class BokaBokaBundle extends Bundle
 
     public function build(ContainerBuilder $container)
     {
-        $container->addCompilerPass(new ConnectionCompilerPass());
+//        $container->addCompilerPass(new ConnectionCompilerPass());
     }
 
 }

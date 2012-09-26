@@ -4,7 +4,7 @@
  * @since 19.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Exchange;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP\Exchange;
 
 class Type
 {

@@ -8,24 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use \Aurora\BokaBokaBundle\Messaging\Annotations as Messaging;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Queue;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Exchange;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 
-/**
- * @Messaging\Queue("test")
- */
-class TestQueue extends Queue {}
-
-/**
- * @Messaging\Exchange("test", type=Messaging\ExchangeType::FANOUT, durable=false)
- */
-class TestExchange extends Exchange {}
-
-/**
- * @Messaging\Message()
- */
 class SimpleMessage extends Message {}
 
 class TestCommand extends ContainerAwareCommand
@@ -34,28 +18,24 @@ class TestCommand extends ContainerAwareCommand
     {
         $this
             ->setName('rabbit:test')
-            ->setDescription('Greet someone')
-            ->addArgument('name', InputArgument::OPTIONAL, 'Who do you want to greet?');
+            ->setDescription('Test publish and pull message from queue');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
-
-//        $queue = new TestQueue();
-//        $exchange = new TestExchange();
 
         $connection = $this->getContainer()->get('boka_boka.connection.default');
 
         $queue = $this->getContainer()->get('boka_boka.queue.default');
         $exchange = $this->getContainer()->get('boka_boka.exchange.default');
 
-//        $queue->bind($exchange, 'test');
-
         $message = new SimpleMessage();
         $message->setTitle('test');
         $message->setBody('asdfasdfasdf asdf asd fas');
-        $message->getHeaders()->add("X-Custom-Header", "test");
+        $message->getHeaders()->add("test_1", "test");
+        $message->getAttributes()->setAppId('test');
+
+        $output->writeln("message:: ".serialize($message));
 
         $output->writeln("connection:: ". (string)$connection);
         $output->writeln("queue:: ". (string)$queue);

@@ -4,7 +4,7 @@
  * @since 08.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Connection;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP\Connection;
 
 use \Symfony\Component\DependencyInjection\ContainerInterface;
 

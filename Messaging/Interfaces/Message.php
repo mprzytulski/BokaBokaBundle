@@ -11,5 +11,6 @@ interface Message
     public function getRoutingKey();
     public function getFlags();
     public function getAttributes();
+    public function getHeaders();
     public function getBody();
 }

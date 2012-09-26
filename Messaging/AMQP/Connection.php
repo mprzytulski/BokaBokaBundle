@@ -4,7 +4,7 @@
  * @since 08.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP;
 
 use \Aurora\BokaBokaBundle\Messaging\Traits\DecoratedObject;
 

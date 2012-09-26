@@ -4,12 +4,13 @@
  * @since 08.09.2012
  */
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP;
 
 use \Aurora\BokaBokaBundle\Messaging\Interfaces\Message as MessageInterface;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Attributes;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Headers;
-use \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Flags;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Message\Attributes;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Message\Headers;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Message\Flags;
+use \Aurora\BokaBokaBundle\Messaging\AMQP\Exchange;
 
 class Message implements MessageInterface
 {
@@ -87,7 +88,7 @@ class Message implements MessageInterface
     }
 
     /**
-     * @return \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Attributes
+     * @return \Aurora\BokaBokaBundle\Messaging\AMQP\Message\Attributes
      */
     public function getAttributes()
     {
@@ -100,7 +101,7 @@ class Message implements MessageInterface
     }
 
     /**
-     * @return \Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message\Headers
+     * @return \Aurora\BokaBokaBundle\Messaging\AMQP\Message\Headers
      */
     public function getHeaders()
     {
@@ -114,12 +115,14 @@ class Message implements MessageInterface
 
     public function getBody()
     {
-        return json_encode($this->body_parts);
+        return $this->body_parts;
     }
 
-    public static function create(\AMQPEnvelope $raw)
+    public static function create(\AMQPEnvelope $raw, Exchange $exchange)
     {
-        $body = json_decode($raw->getBody(), true);
+
+        $body = $exchange->getSerializer()->deserialize($raw->getBody());
+
         $attrs = new Attributes(array(
             Attributes::APP_ID           => $raw->getAppId(),
             Attributes::CONTENT_ENCODING => $raw->getContentEncoding(),
@@ -133,11 +136,11 @@ class Message implements MessageInterface
             Attributes::TYPE             => $raw->getType()
         ));
 
+        var_dump($raw);
+
         $headers = new Headers($raw->getHeaders());
 
         $flags = new Flags();
-
-//        const DELIVERY_MODE    = 'delivery_mode';
 
         $msg = new Message($raw->getRoutingKey(), $body, $flags, $attrs, $headers);
         return $msg;

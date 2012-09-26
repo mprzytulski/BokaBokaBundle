@@ -1,6 +1,6 @@
 <?php
 
-namespace Aurora\BokaBokaBundle\Messaging\RabbitMQ\Message;
+namespace Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 
 /**
  * @Annotation
