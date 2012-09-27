@@ -181,8 +181,8 @@ class Message implements MessageInterface
 
         $msg_class = new \ReflectionClass($headers->get('X-PHP-Type', 'Message'));
         $msg = $msg_class->newInstanceArgs(array(
-                $raw->getRoutingKey(), $body, $flags, $attrs, $headers, $ack
-            ));
+            $raw->getRoutingKey(), $body, $flags, $attrs, $headers, $ack
+        ));
 
         $msg->setQueue($queue);
         $msg->delivery_tag = $raw->getDeliveryTag();

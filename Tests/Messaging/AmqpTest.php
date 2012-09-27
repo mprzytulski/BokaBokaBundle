@@ -40,6 +40,7 @@ abstract class AmqpTest extends \Symfony\Bundle\FrameworkBundle\Test\WebTestCase
         $this->connection = new Connection('10.8.0.10', 5672, '/');
         $this->exchange = new Exchange($this->connection, $this->serializer, 'test');
         $this->queue = new Queue($this->connection, 'test', $this->exchange);
+        $this->queue->setEventDispatcher($this->_container->get('event_dispatcher'));
 
         $this->queue->purge();
 

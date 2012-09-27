@@ -10,6 +10,7 @@
 use Symfony\Component\Console\Tester\CommandTester;
 use Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 use Aurora\BokaBokaBundle\Tests\Messaging\AmqpTest;
+use Aurora\BokaBokaBundle\Messaging\Events\MessageEvents;
 
 class TestMessage extends Message
 {
@@ -70,6 +71,29 @@ class MessageTest extends AmqpTest
         $message_in = $this->queue->getOne();
 
         $this->assertEquals($message_in->getHeaders()->get('X-Custom-Header'), $val);
+    }
+
+    protected $received_messages = 0;
+
+    public function consumeMessage($event)
+    {
+        $event->getMessage()->ack();
+        $this->received_messages++;
+    }
+
+    public function testConsume()
+    {
+        for($i = 0; $i < 5; $i++) {
+            $message = new TestMessage();
+            $message->setTitle('Message ' . $i);
+            $this->exchange->publish($message);
+        }
+
+        $this->_container->get('event_dispatcher')->addListener(MessageEvents::MESSAGE_RECEIVED, array($this, 'consumeMessage'));
+
+        $this->queue->consume(5);
+
+        $this->assertEquals(5, $this->received_messages);
     }
 
 }

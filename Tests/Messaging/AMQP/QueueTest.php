@@ -10,9 +10,6 @@ namespace Aurora\BokaBokaBundle\Tests\Messaging\AMQP;
 use Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 use Aurora\BokaBokaBundle\Tests\Messaging\AmqpTest;
 
-
-//class TestQueue extends Queue {}
-
 class QueueTest extends AmqpTest
 {
 

@@ -12,6 +12,12 @@ use \Aurora\BokaBokaBundle\Messaging\AMQP\Message;
 
 class SimpleMessage extends Message {}
 
+class X extends \SplEnum
+{
+    const TEST = 1;
+
+}
+
 class TestCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -33,12 +39,17 @@ class TestCommand extends ContainerAwareCommand
         $message_out->setTitle('Subject');
         $message_out->setBody('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
         $message_out->getHeaders()->add("X-Test-Header", "true");
-        $message_out->getAttributes()->setAppId('Symfony 2.0 Messaging Test');
+//        $message_out->getAttributes()->setAppId('Symfony 2.0 Messaging Test');
 
         $output->writeln("connection:: ". (string)$connection);
         $output->writeln("queue:: ". (string)$queue);
         $output->writeln("exchange:: ". (string)$exchange);
         $output->writeln("message:: ". (string)$message_out);
+
+        $x = new X();
+
+        var_dump($queue->getAttributes());
+//        $output->writeln("message:: ". var_dump($queue->getAttributes()));
 
         $exchange->publish($message_out);
 
