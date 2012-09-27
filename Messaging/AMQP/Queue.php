@@ -45,7 +45,7 @@ class Queue implements Bindable
         if(!$raw) {
             return null;
         }
-        return Message::create($raw, $this->exchanges[$raw->getExchangeName()]);
+        return Message::create($raw, $this, $this->exchanges[$raw->getExchangeName()], $ack);
     }
 
     public function get($items = 1, $ack = true)
@@ -82,6 +82,25 @@ class Queue implements Bindable
     protected function getRelated($to_write = false)
     {
         return $this->getRelatedObject('\AMQPQueue', array($this->getConnection()->getChannel()), $to_write);
+    }
+
+    public function ack(Message $message)
+    {
+        $x = $this->getRelated(true)->ack($message->getDeliveryTag());
+        $message->isAck($x);
+        return $x;
+    }
+
+    public function nack(Message $message)
+    {
+        $x = $this->getRelated(true)->nack($message->getDeliveryTag());
+        $message->isAck(!$x);
+        return $x;
+    }
+
+    public function purge()
+    {
+        return $this->getRelated(true)->purge();
     }
 
 

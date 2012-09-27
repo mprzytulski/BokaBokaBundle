@@ -13,4 +13,10 @@ interface Message
     public function getAttributes();
     public function getHeaders();
     public function getBody();
+
+    public function ack();
+    public function isAck($ack = true);
+    public function nAck();
+
+    public function getDeliveryTag();
 }

@@ -22,9 +22,9 @@ class Headers implements \JsonSerializable
         $this->headers[$name] = $value;
     }
 
-    public function get($name)
+    public function get($name, $default = null)
     {
-        return isset($this->headers[$name]) ? $this->headers[$name] : null;
+        return isset($this->headers[$name]) ? $this->headers[$name] : $default;
     }
 
     public function getAll()

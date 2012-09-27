@@ -29,23 +29,21 @@ class TestCommand extends ContainerAwareCommand
         $queue = $this->getContainer()->get('boka_boka.queue.default');
         $exchange = $this->getContainer()->get('boka_boka.exchange.default');
 
-        $message = new SimpleMessage();
-        $message->setTitle('test');
-        $message->setBody('asdfasdfasdf asdf asd fas');
-        $message->getHeaders()->add("test_1", "test");
-        $message->getAttributes()->setAppId('test');
-
-        $output->writeln("message:: ".serialize($message));
+        $message_out = new SimpleMessage();
+        $message_out->setTitle('Subject');
+        $message_out->setBody('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
+        $message_out->getHeaders()->add("X-Test-Header", "true");
+        $message_out->getAttributes()->setAppId('Symfony 2.0 Messaging Test');
 
         $output->writeln("connection:: ". (string)$connection);
         $output->writeln("queue:: ". (string)$queue);
         $output->writeln("exchange:: ". (string)$exchange);
-        $output->writeln("message:: ". (string)$message);
+        $output->writeln("message:: ". (string)$message_out);
 
-        $exchange->publish($message);
+        $exchange->publish($message_out);
 
-        $message1 = $queue->getOne();
-        $output->writeln("message:: ". (string)$message1);
+        $message_in = $queue->getOne();
+        $output->writeln("message:: ". (string)$message_in);
     }
 
 }

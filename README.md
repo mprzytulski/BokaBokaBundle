@@ -78,10 +78,10 @@ Full broker configuration and connection, exchange, broker configuration is prov
     $exchange = $this->getContainer()->get('boka_boka.exchange.default');
 
     $message_out = new SimpleMessage();
-    $message_out->setTitle('test');
-    $message_out->setBody('asdfasdfasdf asdf asd fas');
-    $message_out->getHeaders()->add("test_1", "test");
-    $message_out->getAttributes()->setAppId('test');
+    $message_out->setTitle('Subject');
+    $message_out->setBody('Lorem ipsum dolor sit amet, consectetur adipiscing elit.');
+    $message_out->getHeaders()->add("X-Test-Header", "true");
+    $message_out->getAttributes()->setAppId('Symfony 2.0 Messaging Test');
 
     echo "exchange:: ". (string)$exchange);
     echo "message:: ". (string)$message_out);

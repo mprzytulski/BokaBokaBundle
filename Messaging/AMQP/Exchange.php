@@ -46,6 +46,9 @@ class Exchange implements Bindable
 
     public function publish(MessageInterface $message)
     {
+
+        $message->getHeaders()->add('X-PHP-Type', get_class($message));
+
         return $this->getRelated(true)->publish(
             $this->serializer->serialize($message),
             $message->getRoutingKey(),

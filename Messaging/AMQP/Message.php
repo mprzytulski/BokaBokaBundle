@@ -22,7 +22,13 @@ class Message implements MessageInterface
     protected $headers;
     protected $flags;
 
-    public function __construct($routing_key = 'default', array $body_parts = array(), Flags $flags = null, Attributes $attrs = null, Headers $headers = null)
+    protected $delivery_tag;
+
+    protected $queue;
+
+    protected $ack = false;
+
+    public function __construct($routing_key = 'default', array $body_parts = array(), Flags $flags = null, Attributes $attrs = null, Headers $headers = null, $ack = true)
     {
         $this->routing_key = $routing_key;
         $this->body_parts = $body_parts;
@@ -42,6 +48,7 @@ class Message implements MessageInterface
 
         $this->headers = $headers;
         $this->attributes = $attrs;
+        $this->ack = $ack;
     }
 
     public function getDefaults()
@@ -71,7 +78,7 @@ class Message implements MessageInterface
             $this->addParameter(strtolower(substr($name, 3)), $params[0]);
             return;
         }
-        elseif(strpos($name, 'set') === 0) {
+        elseif(strpos($name, 'get') === 0) {
             return $this->getParameter(strtolower(substr($name, 3)));
         }
         throw new \RuntimeException("Method not exists");
@@ -118,7 +125,39 @@ class Message implements MessageInterface
         return $this->body_parts;
     }
 
-    public static function create(\AMQPEnvelope $raw, Exchange $exchange)
+
+    protected function setQueue(Queue $queue)
+    {
+        $this->queue = $queue;
+    }
+
+    public function getDeliveryTag()
+    {
+        return $this->delivery_tag;
+    }
+
+    public function isAck($ack = true)
+    {
+        if(func_num_args() == 1) {
+            $this->ack = $ack;
+        }
+        return $this->ack;
+    }
+
+    public function ack()
+    {
+        $this->queue->ack($this);
+        return true;
+    }
+
+    public function nack()
+    {
+        $this->queue->nack($this);
+        return true;
+    }
+
+
+    public static function create(\AMQPEnvelope $raw, Queue $queue, Exchange $exchange, $ack = true)
     {
 
         $body = $exchange->getSerializer()->deserialize($raw->getBody());
@@ -136,13 +175,17 @@ class Message implements MessageInterface
             Attributes::TYPE             => $raw->getType()
         ));
 
-        var_dump($raw);
-
         $headers = new Headers($raw->getHeaders());
 
         $flags = new Flags();
 
-        $msg = new Message($raw->getRoutingKey(), $body, $flags, $attrs, $headers);
+        $msg_class = new \ReflectionClass($headers->get('X-PHP-Type', 'Message'));
+        $msg = $msg_class->newInstanceArgs(array(
+                $raw->getRoutingKey(), $body, $flags, $attrs, $headers, $ack
+            ));
+
+        $msg->setQueue($queue);
+        $msg->delivery_tag = $raw->getDeliveryTag();
         return $msg;
     }
 
